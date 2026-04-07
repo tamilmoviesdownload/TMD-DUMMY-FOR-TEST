@@ -29,6 +29,76 @@ logger = logging.getLogger(__name__)
 TIMEZONE = "Asia/Kolkata"
 BATCH_FILES = {}
 
+#__________________________________________________________
+from pyrogram import Client, filters, enums
+from info import ADMINS
+from database.users_chats_db import db
+
+@Client.on_message(filters.command("add_req") & filters.user(ADMINS))
+async def add_rq_channel(client, message):
+    if len(message.command) < 2:
+        return await message.reply("Usage: `/add_req -100xxxxxxx` (Multiple IDs allowed with space)")
+    
+    current_list = await db.get_auth_req_channels()
+    new_ids = message.text.split()[1:]
+    
+    added = []
+    for char_id in new_ids:
+        try:
+            cid = int(char_id)
+            if cid not in current_list:
+                # Check if bot is admin
+                chat = await client.get_chat(cid)
+                current_list.append(cid)
+                added.append(f"{chat.title} ({cid})")
+        except Exception as e:
+            await message.reply(f"Error adding {char_id}: {e}")
+
+    await db.update_auth_req_channels(current_list)
+    await message.reply(f"✅ Added:\n" + "\n".join(added))
+
+@Client.on_message(filters.command("del_req") & filters.user(ADMINS))
+async def del_rq_channel(client, message):
+    if len(message.command) < 2:
+        return await message.reply("Usage: `/del_req -100xxxxxxx` or `/del_req all` ")
+    
+    current_list = await db.get_auth_req_channels()
+    target = message.command[1]
+
+    if target.lower() == "all":
+        await db.update_auth_req_channels([])
+        return await message.reply("🗑 Removed all Force Join Request channels.")
+
+    try:
+        cid = int(target)
+        if cid in current_list:
+            current_list.remove(cid)
+            await db.update_auth_req_channels(current_list)
+            await message.reply(f"✅ Removed {cid} from Force Join list.")
+        else:
+            await message.reply("This ID is not in the list.")
+    except:
+        await message.reply("Invalid ID.")
+
+@Client.on_message(filters.command("list_req") & filters.user(ADMINS))
+async def list_rq_channels(client, message):
+    current_list = await db.get_auth_req_channels()
+    if not current_list:
+        return await message.reply("List is empty.")
+    
+    text = "📢 **Current Force Join Channels:**\n\n"
+    for cid in current_list:
+        try:
+            chat = await client.get_chat(cid)
+            text += f"• {chat.title} (`{cid}`)\n"
+        except:
+            text += f"• Unknown Chat (`{cid}`)\n"
+    await message.reply(text)
+
+
+#__________________________________________________________
+
+
 @Client.on_message(filters.command("start") & filters.incoming)
 async def start(client, message):
     if EMOJI_MODE:
