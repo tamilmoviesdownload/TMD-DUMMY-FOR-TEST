@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+  tmd_db:
+    image: mongo:latest
+    container_name: tmd_db
+    restart: always
+    volumes:
+      - ./mongo_data:/data/db
+    # Do NOT use 127.0.0.1 here
+    ports:
+      - "127.0.0.1:27017:27017"
+
+  worker:
+    build: .
+    container_name: tmd_bot
+    restart: always
+    depends_on:
+      - tmd_db
+    environment:
+      API_ID: 37144378
+      API_HASH: "1855ce0a0d9093fc477f5eabbc156382"
+      BOT_TOKEN: "8438175373:AAFbo5YDZYH-ohfGzoDQ-V2Ve47DAG-uVZk"
+      ADMINS: 1466559542
+      DATABASE_URI: "mongodb://tmd_db:27017"
+      DATABASE_NAME: "TmdBotz"
+      COLLECTION_NAME: "CollectionTmdBotz"
+      CHANNELS: "-1002298780114 -1002541527082 -1002591205755 -1002512427215 -1002346291680 -1002543608367 -1003161315191 -1002646022372 -1003406327357 -1003395624516 -1003416214249 -1003430449494 -1001754899629"
+      LOG_CHANNEL: "-1003462534811"
+      BIN_CHANNEL: "-1003543211486"
+      DELETE_CHANNELS: "-1003699152270"
+      LOG_API_CHANNEL: "-1003684133862"
+      LOG_VR_CHANNEL: "-1003684133862"
+      MOVIE_UPDATE_CHANNEL: "-1003398126197"
+      PREMIUM_LOGS: "-1003699152270"
+      REQST_CHANNEL_ID: "-1003699152270"
+      SUPPORT_CHAT_ID: "-1003585689544"
+      FQDN: "77.90.19.216:8080"
+      HAS_SSL: ""
+      URL: "http://77.90.19.216:8080/"
+      GRP_LNK: "https://t.me/+RXnEUdYTcNhmNjg1"
+      SUPPORT_CHAT: "https://t.me/+nmlGDuEnRS5hYmFl"
+      SHORTENER_API: "db1a78fe2ca155e01d4212b4efee308e5fbacadc"
+      SHORTENER_WEBSITE: "nowshort.com"
+      SHORTENER_API2: "893c17729d3c25ad28f82ec47ed6d28c7c2827be"
+      SHORTENER_WEBSITE2: "liteshort.com"
+      TUTORIAL: "https://t.me/howtodownloadtlink/11"
+      TUTORIAL_2: "https://t.me/howtodownloadtlink/11"
+      TUTORIAL_3: "https://t.me/howtodownloadtlink/11"
+      PICS: "https://telegra.ph/file/58fef5cb458d5b29b0186.jpg https://telegra.ph/file/f0aa4f433132769f8970c.jpg https://telegra.ph/file/f515fbc2084592eca60a5.jpg https://telegra.ph/file/20dbdcffaa89bd3d09a74.jpg https://telegra.ph/file/6045ba953af4def846238.jpg"
+      USE_CAPTION_FILTER: "True"
+      PORT: 8080
+    ports:
+      - "8080:8080"
