@@ -5,6 +5,20 @@ import pytz
 from pymongo.errors import DuplicateKeyError
 
 class Database:    
+    async def get_auth_req_channels(self):
+        # We use a fixed ID like '123' or 'GLOBAL_CONFIG' to store global bot settings
+        bot_id = 12345678  # You can also use client.me.id dynamically later
+        default = AUTH_REQ_CHANNELS # Fallback to info.py values
+        res = await self.botcol.find_one({'id': bot_id})
+        return res.get('auth_req_channels', default) if res else default
+
+    async def update_auth_req_channels(self, channels_list):
+        bot_id = 12345678
+        await self.botcol.update_one(
+            {'id': bot_id},
+            {'$set': {'auth_req_channels': channels_list}},
+            upsert=True
+        )
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
